@@ -40,6 +40,8 @@ void solve() {
       if(!st.empty() && mat[c] == s[st.top()]) {
         chk[st.top()] = chk[i] = 1;
         st.pop();
+      } else {
+        while(!st.empty()) st.pop();
       }
     }
   }
