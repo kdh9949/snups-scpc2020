@@ -24,15 +24,12 @@ void solve() {
   int n, m;
   cin >> n >> m;
 
-  unsigned int seed = 0;
   vector<vint> e(n);
   for(int i = 0; i < m; i++) {
     int x, y;
     cin >> x >> y;
     e[x].push_back(y);
     e[y].push_back(x);
-    seed *= (2 * x + y + 5);
-    seed += x + 2 * y + 3;
   }
 
   vint q(n);
@@ -48,70 +45,53 @@ void solve() {
   };
 
   int ans = int(1e9);
-  vint av;
+  vint av, p, chk(n), cur;
+  mt19937 mt(9949 * n + m);
+  uniform_int_distribution<int> rnd(0, n - 1);
 
-  if(n < 9) {
-    vint p(n);
-    iota(all(p), 0);
-    do {
-      int t = eval(p);
-      if(ans > t) {
-        ans = t;
-        av = p;
-      }
-    } while(next_permutation(all(p)));
-  }
+  for(int st = 0; st < n * 20; st++) {
+    p.clear();
+    fill(all(chk), 0);  
+    p.push_back(st % n);
+    chk[st % n] = 1;
 
-  else{
-    vint p, chk(n), cur;
-
-    mt19937 mt(9949 * n + m);
-    uniform_int_distribution<int> rnd(0, n - 1);
-
-    for(int st = 0; st < n * 20; st++) {
-      p.clear();
-      fill(all(chk), 0);  
-      p.push_back(st % n);
-      chk[st % n] = 1;
-
-      for(int t = n - 1; t--; ) {
-        int mx = -n;
-        vint cur;
-        for(int i = 0; i < n; i++) {
-          if(chk[i]) continue;
-          int cnt = 0;
-          for(int j : e[i]) cnt += (2 * chk[j] - 1);
-          if(mx <= cnt) {
-            if(mx < cnt) cur.clear();
-            mx = cnt;
-            cur.push_back(i);
-          }
+    for(int t = n - 1; t--; ) {
+      int mx = -n;
+      vint cur;
+      for(int i = 0; i < n; i++) {
+        if(chk[i]) continue;
+        int cnt = 0;
+        for(int j : e[i]) cnt += (2 * chk[j] - 1);
+        if(mx <= cnt) {
+          if(mx < cnt) cur.clear();
+          mx = cnt;
+          cur.push_back(i);
         }
-        shuffle(all(cur), mt);
-        p.push_back(cur[0]);
-        chk[cur[0]] = 1;
       }
-    
-      int t = eval(p);
-      if(ans > t) {
-        ans = t;
-        av = p;
-      }
+      shuffle(all(cur), mt);
+      p.push_back(cur[0]);
+      chk[cur[0]] = 1;
     }
-    
-    int tt = 2000;
-    while(tt--) {
-      int x, y;
-      do {
-        x = rnd(mt);
-        y = rnd(mt);
-      } while(x == y);
-      
-      swap(av[x], av[y]);
-      int t = eval(av);
-      if(ans > t) ans = t;
-      else swap(av[x], av[y]);
+
+    int t = eval(p);
+    if(ans > t) {
+      ans = t;
+      av = p;
     }
+  }
+    
+  int tt = 2000;
+  while(tt--) {
+    int x, y;
+    do {
+      x = rnd(mt);
+      y = rnd(mt);
+    } while(x == y);
+
+    swap(av[x], av[y]);
+    int t = eval(av);
+    if(ans > t) ans = t;
+    else swap(av[x], av[y]);
   }
 
   cout << ans << '\n';
